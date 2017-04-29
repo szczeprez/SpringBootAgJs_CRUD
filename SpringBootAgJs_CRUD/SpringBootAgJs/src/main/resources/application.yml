@@ -1,21 +1,22 @@
+
 ---
 server:
   port: 8080
   contextPath: /SpringBootAgJs
 ---
-
+ 
 spring:
   profiles: local
 datasource:
-  sampleapp:
-    url: jdbc:mysql://localhost:3306/websystique
-    username: myuser
-    password: myuser
+  appconf:
+    url: jdbc:mysql://localhost:3306/skoczkowie
+    username: root
+    password: 
     driverClassName: com.mysql.jdbc.Driver
-    defaultSchema:
     maxPoolSize: 20
     hibernate:
       hbm2ddl.method: create-drop
       show_sql: true
       format_sql: true
-      dialect: org.hibernate.dialect.MySQLDialect
+      dialect: org.hibernate.dialect.MySQLDialect 
+

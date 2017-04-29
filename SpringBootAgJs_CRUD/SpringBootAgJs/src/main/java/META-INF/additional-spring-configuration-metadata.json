@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "datasource.sampleapp.hibernate.hbm2ddl.method",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.sampleapp.hibernate.hbm2ddl.method'"
+  },
+  {
+    "name": "datasource.appconf.hibernate.hbm2ddl.method",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.appconf.hibernate.hbm2ddl.method'"
+  }
+]}

@@ -3,6 +3,7 @@ package com.szczeprez.springboot.configuration;
 import java.util.Properties;
 
 import javax.naming.NamingException;
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,12 +15,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @EnableJpaRepositories(basePackages = "com.szczeprez.springboot.repositories",
@@ -36,9 +42,10 @@ public class JpaConfiguration {
 	
 	@Bean
 	@Primary
-	@ConfigurationProperties(prefix = "datasource.sampleapp")
+	@ConfigurationProperties(prefix = "datasource.appconf")
 	public DataSourceProperties dataSourceProperties(){
-		return new DataSourceProperties(); 
+		DataSourceProperties dataSourceProperties = new DataSourceProperties(); 
+		return dataSourceProperties; 
 	}
 	
 	@Bean
@@ -53,7 +60,19 @@ public class JpaConfiguration {
 	
 	@Bean
 	public DataSource dataSource() {
-		 return DataSourceBuilder.create().build();
+		DataSourceProperties dataSourceProperties = dataSourceProperties();
+
+		HikariDataSource dataSource = (HikariDataSource) DataSourceBuilder
+				.create(dataSourceProperties.getClassLoader())
+ 				.driverClassName(dataSourceProperties.getDriverClassName()) 
+				.url(dataSourceProperties.getUrl())
+				.username(dataSourceProperties.getUsername())
+				.password(dataSourceProperties.getPassword())
+				.type(HikariDataSource.class)
+				.build();
+		dataSource.setMaximumPoolSize(maxPoolSize); 
+		
+		return dataSource; 
 	}
 	
 	@Bean
@@ -64,13 +83,21 @@ public class JpaConfiguration {
 	
 	private Properties jpaProperties() {
 		Properties properties = new Properties();
-		properties.put("hibernate.dialect", environment.getRequiredProperty("datasource.sampleapp.hibernate.dialect"));
-		properties.put("hibernate.hbm2ddl.auto", environment.getRequiredProperty("datasource.sampleapp.hibernate.hbm2ddl.method"));
-		properties.put("hibernate.show_sql", environment.getRequiredProperty("datasource.sampleapp.hibernate.show_sql"));
-		properties.put("hibernate.format_sql", environment.getRequiredProperty("datasource.sampleapp.hibernate.format_sql"));
-		if(StringUtils.isNotEmpty(environment.getRequiredProperty("datasource.sampleapp.defaultSchema"))){
-			properties.put("hibernate.default_schema", environment.getRequiredProperty("datasource.sampleapp.defaultSchema"));
-		}
+ 
+		
+		properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL5Dialect");
+		properties.put("hibernate.hbm2ddl.auto", "create-drop");
+		properties.put("hibernate.show_sql", "true");
+		properties.put("hibernate.format_sql", "true");
+ 
 		return properties;
+	}
+	
+	@Bean
+	@Autowired
+	public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
+		JpaTransactionManager txManager = new JpaTransactionManager();
+		txManager.setEntityManagerFactory(emf);
+		return txManager;
 	}
 }
