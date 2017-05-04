@@ -6,7 +6,6 @@ import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
@@ -42,10 +41,9 @@ public class JpaConfiguration {
 	
 	@Bean
 	@Primary
-	@ConfigurationProperties(prefix = "datasource.appconf")
+	@ConfigurationProperties(prefix = "datasource.sampleapp")
 	public DataSourceProperties dataSourceProperties(){
-		DataSourceProperties dataSourceProperties = new DataSourceProperties(); 
-		return dataSourceProperties; 
+		return new DataSourceProperties();  
 	}
 	
 	@Bean
@@ -61,7 +59,7 @@ public class JpaConfiguration {
 	@Bean
 	public DataSource dataSource() {
 		DataSourceProperties dataSourceProperties = dataSourceProperties();
-
+		
 		HikariDataSource dataSource = (HikariDataSource) DataSourceBuilder
 				.create(dataSourceProperties.getClassLoader())
  				.driverClassName(dataSourceProperties.getDriverClassName()) 
@@ -83,12 +81,11 @@ public class JpaConfiguration {
 	
 	private Properties jpaProperties() {
 		Properties properties = new Properties();
- 
-		
-		properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL5Dialect");
-		properties.put("hibernate.hbm2ddl.auto", "create-drop");
-		properties.put("hibernate.show_sql", "true");
-		properties.put("hibernate.format_sql", "true");
+
+		properties.put("hibernate.dialect", environment.getRequiredProperty("datasource.sampleapp.hibernate.dialect"));
+		properties.put("hibernate.hbm2ddl.auto", environment.getRequiredProperty("datasource.sampleapp.hibernate.hbm2ddl.method"));
+		properties.put("hibernate.show_sql",  environment.getRequiredProperty("datasource.sampleapp.hibernate.show_sql"));
+		properties.put("hibernate.format_sql",  environment.getRequiredProperty("datasource.sampleapp.hibernate.format_sql"));
  
 		return properties;
 	}
