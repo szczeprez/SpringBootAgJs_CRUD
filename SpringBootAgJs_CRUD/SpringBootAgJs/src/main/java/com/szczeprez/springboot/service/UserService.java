@@ -2,6 +2,7 @@ package com.szczeprez.springboot.service;
 
 import java.util.List;
 
+import com.szczeprez.springboot.exceptions.CustomerExceptionType;
 import com.szczeprez.springboot.model.User;
 
 public interface UserService {
